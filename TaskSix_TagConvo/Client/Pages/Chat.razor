@@ -88,9 +88,11 @@
     private async Task<Message?> SendMessage(string message, string[] tags)
     {
         bool isNewTagsPresent = allTags.Select(x => x.Name).Any(x => !tags.Contains(x));
+
+        Message? msg = await ChatService.SendMessage(message, tags);
         if (isNewTagsPresent)
             await ReloadAllTags();
-        return await ChatService.SendMessage(message, tags);
+        return msg;
     }
     private async Task LoadFilteredMessages(Guid[] tagIds)
     {

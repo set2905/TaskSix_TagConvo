@@ -18,7 +18,7 @@ namespace TaskSix_TagConvo.Server.Domain.Repo
             IOrderedQueryable<Message> query;
             if (tagIds.Length > 0)
             {
-                query = context.Messages.Where(m => context.MessageTagRelations.Any(r => tagIds.Contains(r.TagId) && r.MessageId==m.Id))
+                query = context.Messages.Where(m => !context.MessageTagRelations.Select(x => x.MessageId).Contains(m.Id)||context.MessageTagRelations.Any(r => tagIds.Contains(r.TagId) && r.MessageId==m.Id))
                                         .OrderBy(x => x.SentDate);
             }
             else query=context.Messages.OrderBy(x => x.SentDate);
