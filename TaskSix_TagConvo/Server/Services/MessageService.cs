@@ -21,7 +21,7 @@ namespace TaskSix_TagConvo.Server.Services
             return await messageRepo.Get(skip, take, tagIds);
         }
 
-        public async Task AddMessage(string message, string[] tagNames)
+        public async Task<Message?> AddMessage(string message, string[] tagNames)
         {
             Guid messageId;
             messageId = await messageRepo.Save(new() { Content=message, SentDate=DateTime.Now });
@@ -34,6 +34,7 @@ namespace TaskSix_TagConvo.Server.Services
                     tagId = await tagRepo.Save(new() { Name=tagName });
                 await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
             }
+            return await messageRepo.GetById(messageId);
         }
 
         public async Task<List<Tag>> GetAllTags()

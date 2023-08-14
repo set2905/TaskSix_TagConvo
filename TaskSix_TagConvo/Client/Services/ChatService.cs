@@ -12,17 +12,16 @@ namespace TaskSix_TagConvo.Client.Services
         {
             this.snackbar = snackbar;
         }
-        public async Task<bool> SendMessage(string message, string[] tags)
+        public async Task<Message?> SendMessage(string message, string[] tags)
         {
             try
             {
-                await PostAsync<SendMessageModel>("Chat/Send", new(message, tags));
-                return true;
+                return await PostAsync<Message, SendMessageModel>("Chat/Send", new(message, tags));
             }
             catch (Exception ex)
             {
                 snackbar.Add(ex.Message, Severity.Error);
-                return false;
+                return null;
             }
         }
         public async Task<List<Message>> GetFilteredMessages(Guid[] tagIds)

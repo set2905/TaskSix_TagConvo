@@ -20,8 +20,8 @@ namespace TaskSix_TagConvo.Server.Controllers
         [Route("Send")]
         public async Task<IActionResult> SendMessage(SendMessageModel sendMessageModel)
         {
-            await messageService.AddMessage(sendMessageModel.Content, sendMessageModel.Tags);
-            return Ok();
+            Message? added = await messageService.AddMessage(sendMessageModel.Content, sendMessageModel.Tags);
+            return new JsonResult(added);
 
         }
         [HttpPost]

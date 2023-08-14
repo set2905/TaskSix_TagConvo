@@ -2,31 +2,40 @@
 @using TaskSix_TagConvo.Client.Services.Interfaces;
 @using TaskSix_TagConvo.Shared.Model;
 @inject IChatService ChatService
+@inject ISnackbar Snackbar
 
 <PageTitle>TagChat</PageTitle>
-<MudGrid>
+<MudGrid Style="height:100%">
     <MudItem xs="3">
         <MudStack>
-            <MudAutocomplete T="string" Label="Tags" @bind-Value="tagInputValue" SearchFunc="@SearchTags"
+            <MudAutocomplete T="string" Label="Tags" @bind-Value="tagInputValue" SearchFunc="@SearchTags" Immediate="true"
                              ResetValueOnEmptyText="false"
-                             CoerceText="false" CoerceValue="false" />
-            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddTagInputValue" />
-            <MudChipSet AllClosable="true" OnClose="TagClosed">
-                @foreach (string tagName in myMessageTags)
+                             CoerceText="true" CoerceValue="false"
+                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddDisplayedTagInputValue" />
+            <MudDivider />
+            <MudChipSet AllClosable="true" OnClose="HandleDisplayedTagClosed">
+                @foreach (var tagId in showMessagesWithTags)
                 {
-                    <MudChip Text="@tagName"></MudChip>
+                    <MudChip Value="@tagId" Text="@allTags.Single(x=>x.Id==tagId).Name"></MudChip>
                 }
             </MudChipSet>
         </MudStack>
     </MudItem>
     <MudItem xs="9">
-        <MudPaper Height="">
-            <MudList>
-                @foreach (Message msg in displayedMessages)
-                {
-                    <MudListItem Text="@msg.Content"/>
-                }
-            </MudList>
+        <MudPaper Style="height:100%">
+            <MudStack Style="height:100%" Justify="Justify.SpaceBetween">
+                <MudList>
+                    @foreach (Message msg in displayedMessages)
+                    {
+                        <MudListItem Text="@msg.Content" />
+                    }
+                </MudList>
+                <MudStack Justify="Justify.SpaceBetween" Row="true">
+                    <MudTextField @bind-Value="messageInputValue" Variant="Variant.Outlined"></MudTextField>
+                    <MudIconButton OnClick="@SendMessageFromInputValues" Class="pa-0" Icon="@Icons.Material.Filled.Send" Color="Color.Primary" aria-label="send"></MudIconButton>
+                </MudStack>
+            </MudStack>
         </MudPaper>
     </MudItem>
 </MudGrid>
@@ -40,17 +49,29 @@
     List<Tag>? allTags;
 
     string tagInputValue = string.Empty;
+    string messageInputValue = string.Empty;
 
     protected override async Task OnInitializedAsync()
     {
-        await SetMessages(showMessagesWithTags.ToArray());
+        await SetDisplayedMessages(showMessagesWithTags.ToArray());
         // await SendMessage("Test message 2", new string[] { "tag1", "tag2" });
     }
-    private async Task SendMessage(string message, string[] tags)
+    private async Task SendMessageFromInputValues()
     {
-        await ChatService.SendMessage(message, tags);
+        Message? msg = await SendMessage(messageInputValue, myMessageTags.ToArray());
+        if (msg != null)
+        {
+            displayedMessages.Add(msg);
+            messageInputValue = string.Empty;
+        }
+        else
+            ShowError("Couldnt send message!");
     }
-    private async Task SetMessages(Guid[] tagIds)
+    private async Task<Message?> SendMessage(string message, string[] tags)
+    {
+        return await ChatService.SendMessage(message, tags);
+    }
+    private async Task SetDisplayedMessages(Guid[] tagIds)
     {
         displayedMessages = await ChatService.GetFilteredMessages(tagIds);
     }
@@ -66,10 +87,23 @@
             return allTags.Select(x => x.Name);
         return allTags.Select(x => x.Name).Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
     }
-    private void AddTagInputValue()
+    private async Task AddDisplayedTagInputValue()
     {
-        if (myMessageTags.Contains(tagInputValue)) return;
-        myMessageTags.Add(tagInputValue);
+        if (allTags==null) return;
+        Guid addedId = allTags.Single(x => x.Name == tagInputValue).Id;
+        if (showMessagesWithTags.Contains(addedId)) return;
+        showMessagesWithTags.Add(addedId);
+        tagInputValue = string.Empty;
+        await SetDisplayedMessages(showMessagesWithTags.ToArray());
     }
-    private void TagClosed(MudChip chip) => myMessageTags.Remove(chip.Text);
+    private async Task HandleDisplayedTagClosed(MudChip chip) 
+    {
+        showMessagesWithTags.Remove((Guid)chip.Value); 
+        await SetDisplayedMessages(showMessagesWithTags.ToArray());    
+    }
+    private void ShowError(string message)
+    {
+        Snackbar.Add(message, Severity.Error);
+
+    }
 }
