@@ -16,50 +16,24 @@ namespace TaskSix_TagConvo.Server.Services
             this.tagRepo=tagRepo;
             this.messageTagRelationsRepo=messageTagRelationsRepo;
         }
+        public async Task<List<Message>> GetMessages(int skip, int take, string[] tagNames)
+        {
+            return await messageRepo.Get(skip, take, null);
+        }
 
-        public async Task<(bool isSuccesful, string? message)> AddMessage(string message, string[] tagNames)
+        public async Task AddMessage(string message, string[] tagNames)
         {
             Guid messageId;
-            try
-            {
-                messageId = await messageRepo.Save(new() { Content=message });
-            }
-            catch
-            {
-                return (false, $"Couldn't save message to the database.");
-            }
+            messageId = await messageRepo.Save(new() { Content=message, SentDate=DateTime.Now });
             foreach (string tagName in tagNames)
             {
                 Tag? found;
-                try
-                {
-                    found = await tagRepo.GetByName(tagName);
-                }
-                catch
-                {
-                    return (false, $"Error while trying to get tag by name.");
-                }
+                found = await tagRepo.GetByName(tagName);
                 Guid tagId = found!=null ? found.Id : default;
-                try
-                {
-                    if (found == null || tagId==default)
-                        tagId = await tagRepo.Save(new() { Name=tagName });
-                }
-                catch
-                {
-                    return (false, $"Couldn't save tag \"{tagName}\" to the database.");
-                }
-                try
-                {
-                    await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
-                }
-                catch
-                {
-                    return (false, $"Couldn't tie message with tag \"{tagName}\".");
-                }
+                if (found == null || tagId==default)
+                    tagId = await tagRepo.Save(new() { Name=tagName });
+                await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
             }
-            return (true, null);
         }
-
     }
 }

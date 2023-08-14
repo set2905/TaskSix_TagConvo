@@ -20,7 +20,17 @@ namespace TaskSix_TagConvo.Server.Controllers
         [Route("Send")]
         public async Task<IActionResult> SendMessage(SendMessageModel sendMessageModel)
         {
-            var result = await messageService.AddMessage(sendMessageModel.Content, sendMessageModel.Tags);
+            await messageService.AddMessage(sendMessageModel.Content, sendMessageModel.Tags);
+            return Ok();
+
+        }
+        [HttpGet]
+        [Route("GetMessages")]
+        public async Task<IActionResult> GetMessages()
+        {
+            List<Message> messages = await messageService.GetMessages(0, 100, null);
+            return new JsonResult(messages);
+
         }
     }
 }
