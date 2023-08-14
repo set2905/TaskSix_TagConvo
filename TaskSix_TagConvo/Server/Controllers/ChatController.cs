@@ -25,12 +25,18 @@ namespace TaskSix_TagConvo.Server.Controllers
 
         }
         [HttpGet]
-        [Route("GetMessages")]
-        public async Task<IActionResult> GetMessages()
+        [Route("Messages")]
+        public async Task<IActionResult> GetMessages(Guid[] tagIds)
         {
-            List<Message> messages = await messageService.GetMessages(0, 100, null);
+            List<Message> messages = await messageService.GetMessages(0, 100, tagIds);
             return new JsonResult(messages);
-
+        }
+        [HttpGet]
+        [Route("Tags")]
+        public async Task<IActionResult> GetAllTags()
+        {
+            List<Tag> tags = await messageService.GetAllTags();
+            return new JsonResult(tags);
         }
     }
 }

@@ -5,7 +5,8 @@ namespace TaskSix_TagConvo.Server.Domain.Repo.Interfaces
 {
     public interface IMessageRepo : IRepo<Message>
     {
-        public Task<List<Message>> Get(int skip, int take, string[] tagNames);
+        public Task<List<Message>> Get(int skip, int take, Guid[] tagIds);
+
 
     }
 }

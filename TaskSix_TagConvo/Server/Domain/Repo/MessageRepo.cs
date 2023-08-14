@@ -13,11 +13,14 @@ namespace TaskSix_TagConvo.Server.Domain.Repo
         {
             this.context = context;
         }
-        public async Task<List<Message>> Get(int skip, int take, string[] tagNames)
+        public async Task<List<Message>> Get(int skip, int take, Guid[] tagIds)
         {
-            return null;
-           // var joinedTagRelations=context.MessageTagRelations.Join(context.Tags,)
-            //return await context.Messages.Where(x=>context.Mes).OrderBy(x => x.SentDate).Skip(skip).Take(take).ToListAsync();
+            return await context.Messages
+            .Where(m => context.MessageTagRelations.Any(r => tagIds.Contains(r.TagId) && r.MessageId==m.Id))
+            .OrderBy(x => x.SentDate)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
 
         }
         /// <inheritdoc />
