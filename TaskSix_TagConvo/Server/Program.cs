@@ -8,6 +8,7 @@ using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
 using TaskSix_TagConvo.Server.Domain.Repo;
 using TaskSix_TagConvo.Server.Services.Interfaces;
 using TaskSix_TagConvo.Server.Services;
+using TaskSix_TagConvo.Server.Hubs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,8 @@ builder.Services.AddTransient<ITagRepo, TagRepo>();
 builder.Services.AddTransient<IMessageRepo, MessageRepo>();
 builder.Services.AddTransient<IMessageTagsRelationsRepo, MessageTagsRelationsRepo>();
 builder.Services.AddTransient<IMessageService, MessageService>();
+builder.Services.AddTransient<IMessageHub, MessageHub>();
+
 
 
 

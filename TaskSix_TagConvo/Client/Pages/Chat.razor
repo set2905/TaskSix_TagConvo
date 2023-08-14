@@ -1,4 +1,5 @@
 ﻿@page "/"
+@using System.Text;
 @using TaskSix_TagConvo.Client.Services.Interfaces;
 @using TaskSix_TagConvo.Shared.Model;
 @inject IChatService ChatService
@@ -44,11 +45,11 @@
                 <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="">
                     <MudExpansionPanel Text="My Message Tags" MaxHeight="150">
                         <MudStack Row="true">
-                        <MudAutocomplete Class="mx-4" T="string" Label="Search" @bind-Value="myMessageTagInputValue" SearchFunc="@SearchTags" Immediate="false"
-                                         ResetValueOnEmptyText="false"
-                                         CoerceText="false" CoerceValue="true"
-                                         AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
-                        <MudButton OnClick="@AddTagToMyMessage">Add</MudButton>
+                            <MudAutocomplete Class="mx-4" T="string" Label="Search" @bind-Value="myMessageTagInputValue" SearchFunc="@SearchTags" Immediate="false"
+                                             ResetValueOnEmptyText="false"
+                                             CoerceText="false" CoerceValue="true"
+                                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                            <MudButton OnClick="@AddTagToMyMessage">Add</MudButton>
                         </MudStack>
                         <MudChipSet AllClosable="true" OnClose="HandleMyMessageTagRemoved">
                             @foreach (string tag in myMessageTags)
@@ -82,7 +83,13 @@
     private async Task SendMessageFromInputValues()
     {
         if (messageInputValue.Length == 0) return;
-        Message? msg = await SendMessage(messageInputValue, myMessageTags.ToArray());
+        StringBuilder msgBuilder = new();
+        msgBuilder.Append(messageInputValue);
+        foreach (string tag in myMessageTags)
+        {
+            msgBuilder.Append($" #{tag}");
+        }
+        Message? msg = await SendMessage(msgBuilder.ToString(), myMessageTags.ToArray());
         if (msg != null)
         {
             FilteredMessages.Add(msg);

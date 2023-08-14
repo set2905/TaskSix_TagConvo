@@ -1,4 +1,5 @@
 ﻿using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
+using TaskSix_TagConvo.Server.Hubs;
 using TaskSix_TagConvo.Server.Services.Interfaces;
 using TaskSix_TagConvo.Shared.Model;
 
@@ -9,12 +10,14 @@ namespace TaskSix_TagConvo.Server.Services
         private readonly IMessageRepo messageRepo;
         private readonly ITagRepo tagRepo;
         private readonly IMessageTagsRelationsRepo messageTagRelationsRepo;
+        private readonly IMessageHub messageHub;
 
-        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo)
+        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo, IMessageHub messageHub)
         {
             this.messageRepo=messageRepo;
             this.tagRepo=tagRepo;
             this.messageTagRelationsRepo=messageTagRelationsRepo;
+            this.messageHub=messageHub;
         }
         public async Task<List<Message>> GetMessages(int skip, int take, Guid[] tagIds)
         {
@@ -34,7 +37,9 @@ namespace TaskSix_TagConvo.Server.Services
                     tagId = await tagRepo.Save(new() { Name=tagName });
                 await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
             }
-            return await messageRepo.GetById(messageId);
+            Message addedMessage = await messageRepo.GetById(messageId);
+            await messageHub.SendToAll(addedMessage, tagNames);
+            return addedMessage;
         }
 
         public async Task<List<Tag>> GetAllTags()
