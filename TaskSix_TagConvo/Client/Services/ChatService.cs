@@ -37,5 +37,17 @@ namespace TaskSix_TagConvo.Client.Services
                 return new();
             }
         }
+        public async Task<List<Tag>> GetTags()
+        {
+            try
+            {
+                return await GetAsync<List<Tag>>("Chat/Tags")??new();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+                return new();
+            }
+        }
     }
 }

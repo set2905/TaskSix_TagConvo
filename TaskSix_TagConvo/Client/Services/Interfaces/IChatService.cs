@@ -6,6 +6,6 @@ namespace TaskSix_TagConvo.Client.Services.Interfaces
     {
         public Task<bool> SendMessage(string message, string[] tags);
         public Task<List<Message>> GetFilteredMessages(Guid[] tagIds);
-
+        public Task<List<Tag>> GetTags();
     }
 }

@@ -4,24 +4,72 @@
 @inject IChatService ChatService
 
 <PageTitle>TagChat</PageTitle>
-
-<MudText Typo="Typo.h3" GutterBottom="true">Chat with tags</MudText>
+<MudGrid>
+    <MudItem xs="3">
+        <MudStack>
+            <MudAutocomplete T="string" Label="Tags" @bind-Value="tagInputValue" SearchFunc="@SearchTags"
+                             ResetValueOnEmptyText="false"
+                             CoerceText="false" CoerceValue="false" />
+            <MudFab Color="Color.Primary" StartIcon="@Icons.Material.Filled.Add" OnClick="@AddTagInputValue" />
+            <MudChipSet AllClosable="true" OnClose="TagClosed">
+                @foreach (string tagName in myMessageTags)
+                {
+                    <MudChip Text="@tagName"></MudChip>
+                }
+            </MudChipSet>
+        </MudStack>
+    </MudItem>
+    <MudItem xs="9">
+        <MudPaper Height="">
+            <MudList>
+                @foreach (Message msg in displayedMessages)
+                {
+                    <MudListItem Text="@msg.Content"/>
+                }
+            </MudList>
+        </MudPaper>
+    </MudItem>
+</MudGrid>
 
 
 
 @code {
     List<Message> displayedMessages = new();
+    List<Guid> showMessagesWithTags = new();
+    List<string> myMessageTags = new();
+    List<Tag>? allTags;
+
+    string tagInputValue = string.Empty;
+
     protected override async Task OnInitializedAsync()
     {
-        await GetMessages(new Guid[] { Guid.Parse("C103551B-0151-44C5-3E28-08DB9CC560F5") });
-       // await SendMessage("Test message 2", new string[] { "tag1", "tag2" });
+        await SetMessages(showMessagesWithTags.ToArray());
+        // await SendMessage("Test message 2", new string[] { "tag1", "tag2" });
     }
     private async Task SendMessage(string message, string[] tags)
     {
         await ChatService.SendMessage(message, tags);
     }
-    private async Task GetMessages(Guid[] tagIds)
+    private async Task SetMessages(Guid[] tagIds)
     {
-        displayedMessages= await ChatService.GetFilteredMessages(tagIds);
+        displayedMessages = await ChatService.GetFilteredMessages(tagIds);
     }
+    private async Task SetTags()
+    {
+        allTags = await ChatService.GetTags();
+    }
+    private async Task<IEnumerable<string>> SearchTags(string value)
+    {
+        if (allTags == null) await SetTags();
+        if (allTags == null) return new List<string>();
+        if (string.IsNullOrEmpty(value))
+            return allTags.Select(x => x.Name);
+        return allTags.Select(x => x.Name).Where(x => x.Contains(value, StringComparison.InvariantCultureIgnoreCase));
+    }
+    private void AddTagInputValue()
+    {
+        if (myMessageTags.Contains(tagInputValue)) return;
+        myMessageTags.Add(tagInputValue);
+    }
+    private void TagClosed(MudChip chip) => myMessageTags.Remove(chip.Text);
 }
