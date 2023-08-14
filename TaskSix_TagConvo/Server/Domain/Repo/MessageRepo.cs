@@ -15,12 +15,15 @@ namespace TaskSix_TagConvo.Server.Domain.Repo
         }
         public async Task<List<Message>> Get(int skip, int take, Guid[] tagIds)
         {
-            return await context.Messages
-            .Where(m => context.MessageTagRelations.Any(r => tagIds.Contains(r.TagId) && r.MessageId==m.Id))
-            .OrderBy(x => x.SentDate)
-            .Skip(skip)
-            .Take(take)
-            .ToListAsync();
+            IOrderedQueryable<Message> query;
+            if (tagIds.Length > 0)
+            {
+                query = context.Messages.Where(m => context.MessageTagRelations.Any(r => tagIds.Contains(r.TagId) && r.MessageId==m.Id))
+                                        .OrderBy(x => x.SentDate);
+            }
+            else query=context.Messages.OrderBy(x => x.SentDate);
+
+            return await query.Skip(skip).Take(take).ToListAsync();
 
         }
         /// <inheritdoc />

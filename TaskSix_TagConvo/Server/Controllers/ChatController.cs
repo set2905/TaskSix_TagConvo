@@ -24,7 +24,7 @@ namespace TaskSix_TagConvo.Server.Controllers
             return Ok();
 
         }
-        [HttpGet]
+        [HttpPost]
         [Route("Messages")]
         public async Task<IActionResult> GetMessages(Guid[] tagIds)
         {

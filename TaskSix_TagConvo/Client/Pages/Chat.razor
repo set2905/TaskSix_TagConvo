@@ -1,4 +1,6 @@
 ﻿@page "/"
+@using TaskSix_TagConvo.Client.Services.Interfaces;
+@using TaskSix_TagConvo.Shared.Model;
 @inject IChatService ChatService
 
 <PageTitle>TagChat</PageTitle>
@@ -8,9 +10,18 @@
 
 
 @code {
-
+    List<Message> displayedMessages = new();
     protected override async Task OnInitializedAsync()
     {
-       
+        await GetMessages(new Guid[] { Guid.Parse("C103551B-0151-44C5-3E28-08DB9CC560F5") });
+       // await SendMessage("Test message 2", new string[] { "tag1", "tag2" });
+    }
+    private async Task SendMessage(string message, string[] tags)
+    {
+        await ChatService.SendMessage(message, tags);
+    }
+    private async Task GetMessages(Guid[] tagIds)
+    {
+        displayedMessages= await ChatService.GetFilteredMessages(tagIds);
     }
 }

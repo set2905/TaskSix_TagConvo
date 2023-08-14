@@ -20,6 +20,7 @@ namespace TaskSix_TagConvo.Client.Services
             return await response.Content.ReadFromJsonAsync<TReturn>();
 
         }
+
         protected async Task<TReturn?> PostAsync<TReturn, TRequest>(string relativeUri, TRequest requestParam)
         {
             HttpResponseMessage response = await httpClient.PostAsJsonAsync(relativeUri, requestParam);

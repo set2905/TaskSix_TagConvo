@@ -25,5 +25,17 @@ namespace TaskSix_TagConvo.Client.Services
                 return false;
             }
         }
+        public async Task<List<Message>> GetFilteredMessages(Guid[] tagIds)
+        {
+            try
+            {
+                return await PostAsync<List<Message>, Guid[]>("Chat/Messages", tagIds)??new();
+            }
+            catch (Exception ex)
+            {
+                snackbar.Add(ex.Message, Severity.Error);
+                return new();
+            }
+        }
     }
 }
