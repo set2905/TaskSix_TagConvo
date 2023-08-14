@@ -21,10 +21,5 @@
 		<ProjectReference Include="..\Shared\TaskSix_TagConvo.Shared.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-	  <Folder Include="Controllers\" />
-	  <Folder Include="Domain\Repo\Interfaces\" />
-	</ItemGroup>
-
 
 </Project>

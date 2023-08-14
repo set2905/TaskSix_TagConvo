@@ -24,24 +24,26 @@ namespace TaskSix_TagConvo.Server.Migrations
 
             modelBuilder.Entity("TaskSix_TagConvo.Server.Models.MessageTagRelation", b =>
                 {
-                    b.Property<Guid>("TagId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("TagId", "MessageId");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.ToTable("MessageTagRelations");
                 });
 
             modelBuilder.Entity("TaskSix_TagConvo.Shared.Model.Message", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()

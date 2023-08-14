@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaskSix_TagConvo.Server.Migrations
 {
     /// <inheritdoc />
-    public partial class _mainTables : Migration
+    public partial class _MessageTagId : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -15,8 +15,7 @@ namespace TaskSix_TagConvo.Server.Migrations
                 name: "Messages",
                 columns: table => new
                 {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
@@ -28,12 +27,13 @@ namespace TaskSix_TagConvo.Server.Migrations
                 name: "MessageTagRelations",
                 columns: table => new
                 {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TagId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     MessageId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_MessageTagRelations", x => new { x.TagId, x.MessageId });
+                    table.PrimaryKey("PK_MessageTagRelations", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(

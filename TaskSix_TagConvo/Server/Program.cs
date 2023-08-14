@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 using System;
 using TaskSix_TagConvo.Server.Data;
+using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
+using TaskSix_TagConvo.Server.Domain.Repo;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -23,6 +25,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddTransient<ITagRepo, TagRepo>();
+builder.Services.AddTransient<IMessageRepo, MessageRepo>();
+builder.Services.AddTransient<IMessageTagsRelationsRepo, MessageTagsRelationsRepo>();
+
 
 
 var app = builder.Build();

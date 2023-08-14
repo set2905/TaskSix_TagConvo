@@ -12,8 +12,8 @@ using TaskSix_TagConvo.Server.Data;
 namespace TaskSix_TagConvo.Server.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20230814103824__mainTables")]
-    partial class _mainTables
+    [Migration("20230814112631__MessageTagId")]
+    partial class _MessageTagId
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,24 +27,26 @@ namespace TaskSix_TagConvo.Server.Migrations
 
             modelBuilder.Entity("TaskSix_TagConvo.Server.Models.MessageTagRelation", b =>
                 {
-                    b.Property<Guid>("TagId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("MessageId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("TagId", "MessageId");
+                    b.Property<Guid>("TagId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.ToTable("MessageTagRelations");
                 });
 
             modelBuilder.Entity("TaskSix_TagConvo.Shared.Model.Message", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()
