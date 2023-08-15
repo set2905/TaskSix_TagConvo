@@ -26,7 +26,6 @@ string? connection = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb")?
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseMySQL(AzureMySQL.ToMySQLStandard(connection)));
-Add services to the container.
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
