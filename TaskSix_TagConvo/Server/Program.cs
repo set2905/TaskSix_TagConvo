@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting.StaticWebAssets;
 using Microsoft.EntityFrameworkCore;
-using MySQL.Data.EntityFrameworkCore.Extensions;
 using TaskSix_TagConvo.Server.Data;
 using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
 using TaskSix_TagConvo.Server.Domain.Repo;
