@@ -34,7 +34,6 @@ builder.Services.AddTransient<ITagRepo, TagRepo>();
 builder.Services.AddTransient<IMessageRepo, MessageRepo>();
 builder.Services.AddTransient<IMessageTagsRelationsRepo, MessageTagsRelationsRepo>();
 builder.Services.AddTransient<IMessageService, MessageService>();
-builder.Services.AddTransient<IMessageHub, MessageHub>();
 
 
 

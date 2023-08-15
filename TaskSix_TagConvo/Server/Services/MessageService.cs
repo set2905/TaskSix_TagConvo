@@ -23,7 +23,7 @@ namespace TaskSix_TagConvo.Server.Services
         }
         public async Task<List<Message>> GetMessages(int skip, int take, Guid[] tagIds)
         {
-            return await messageRepo.Get(skip, take, tagIds);
+            return await messageRepo.GetFiltered(skip, take, tagIds);
         }
 
         public async Task<Message?> AddMessage(string message, string[] tagNames)

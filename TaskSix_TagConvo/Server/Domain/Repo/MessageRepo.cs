@@ -13,7 +13,7 @@ namespace TaskSix_TagConvo.Server.Domain.Repo
         {
             this.context = context;
         }
-        public async Task<List<Message>> Get(int skip, int take, Guid[] tagIds)
+        public async Task<List<Message>> GetFiltered(int skip, int take, Guid[] tagIds)
         {
             IOrderedQueryable<Message> query;
             if (tagIds.Length > 0)

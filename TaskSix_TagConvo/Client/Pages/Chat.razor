@@ -1,19 +1,16 @@
 ﻿@page "/"
 @using System.Text;
-@using Microsoft.AspNetCore.SignalR.Client;
 @using TaskSix_TagConvo.Client.Services.Interfaces;
 @using TaskSix_TagConvo.Shared.Model;
-
 @inject IChatService ChatService
 @inject ISnackbar Snackbar
-@inject NavigationManager Navigation
-
+@inject IHubMessageService HubMessageService
 
 <PageTitle>TagChat</PageTitle>
 <MudGrid Style="height:100%">
     <MudItem xs="3">
         <MudStack>
-            <MudAutocomplete T="string" Label="Tags" ValueChanged="@AddTagFilter" SearchFunc="@SearchTags" Immediate="true"
+            <MudAutocomplete  T="string" Label="Tag Filter" ValueChanged="@AddTagFilter" SearchFunc="@SearchTags" Immediate="true"
                              ResetValueOnEmptyText="false"
                              CoerceText="true" CoerceValue="false"
                              AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
@@ -29,7 +26,25 @@
     <MudItem xs="9">
         <MudPaper Style="height:100%">
             <MudStack Style="height:100%" Justify="Justify.SpaceBetween">
-                <div class="d-flex flex-column px-4" style="max-height:75vh;min-height:75vh; overflow:scroll;" id="chatContainer">
+                <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="">
+                    <MudStack>
+                        <MudStack Row="true">
+                            <MudAutocomplete Class="ma-4" T="string" Label="My Tags" @bind-Value="myMessageTagInputValue" SearchFunc="@SearchTags" Immediate="false"
+                                             ResetValueOnEmptyText="false"
+                                             CoerceText="false" CoerceValue="true"
+                                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
+                            <MudButton OnClick="@AddTagToMyMessage">Add</MudButton>
+                        </MudStack>
+                        <MudChipSet AllClosable="true" OnClose="HandleMyMessageTagRemoved">
+                            @foreach (string tag in myMessageTags)
+                            {
+                                <MudChip Value="@tag" Text="@tag"></MudChip>
+                            }
+                        </MudChipSet>
+                    </MudStack>
+
+                </MudPaper>
+                <div class="d-flex flex-column px-4" style="max-height:65vh;min-height:65vh; overflow:scroll;" id="chatContainer">
                     @foreach (Message message in FilteredMessages)
                     {
                         <div class="d-flex flex-row my-4">
@@ -46,23 +61,7 @@
                     @bind-Value="messageInputValue" />
                     <MudButton OnClick="@SendMessageFromInputValues" StartIcon="@Icons.Material.Outlined.Send" Color="Color.Primary" ButtonType="ButtonType.Button">Send</MudButton>
                 </MudPaper>
-                <MudPaper Elevation="25" Class="d-flex flex-row px-2 mx-4" Style="">
-                    <MudExpansionPanel Text="My Message Tags" MaxHeight="150">
-                        <MudStack Row="true">
-                            <MudAutocomplete Class="mx-4" T="string" Label="Search" @bind-Value="myMessageTagInputValue" SearchFunc="@SearchTags" Immediate="false"
-                                             ResetValueOnEmptyText="false"
-                                             CoerceText="false" CoerceValue="true"
-                                             AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
-                            <MudButton OnClick="@AddTagToMyMessage">Add</MudButton>
-                        </MudStack>
-                        <MudChipSet AllClosable="true" OnClose="HandleMyMessageTagRemoved">
-                            @foreach (string tag in myMessageTags)
-                            {
-                                <MudChip Value="@tag" Text="@tag"></MudChip>
-                            }
-                        </MudChipSet>
-                    </MudExpansionPanel>
-                </MudPaper>
+
             </MudStack>
         </MudPaper>
     </MudItem>
@@ -71,7 +70,6 @@
 
 
 @code {
-    HubConnection hubConnection;
 
     List<Message> FilteredMessages = new();
     List<string> myMessageTags = new();
@@ -85,19 +83,17 @@
     {
         await ReloadAllTags();
         await LoadFilteredMessages(GetTagFilterIds());
-        if (hubConnection == null)
+        await HubMessageService.Initialize();
+        HubMessageService.OnMessageRecieved += HandleMessageRecieved;
+
+    }
+    private void HandleMessageRecieved(Message msg, string[] tags)
+    {
+        if (showMessagesWithTags.Count==0||tags.Length==0||showMessagesWithTags.Select(x => x.Name).Any(x => tags.Contains(x)))
         {
-            var uri = Navigation.ToAbsoluteUri("/messageHub");
-            hubConnection = new HubConnectionBuilder().WithUrl(uri).Build();
+            FilteredMessages.Add(msg);
+            return;
         }
-        if (hubConnection.State == HubConnectionState.Disconnected)
-        {
-            await hubConnection.StartAsync();
-        }
-        hubConnection.On<Message, string[]>("Message", (message, tags) =>
-        {
-            FilteredMessages.Add(message);
-        });
     }
     private async Task SendMessageFromInputValues()
     {
@@ -113,7 +109,6 @@
             ShowError("Couldnt send message!");
         else
             messageInputValue = string.Empty;
-
     }
     private async Task<Message?> SendMessage(string message, string[] tags)
     {
