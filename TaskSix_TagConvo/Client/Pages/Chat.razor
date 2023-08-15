@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using System.Text;
+@using Microsoft.AspNetCore.SignalR.Client;
 @using TaskSix_TagConvo.Client.Services.Interfaces;
 @using TaskSix_TagConvo.Shared.Model;
 @inject IChatService ChatService
@@ -88,7 +89,7 @@
         HubMessageService.OnMessageRecieved += HandleMessageRecieved;
 
     }
-     
+
 
     private async Task HandleMessageRecieved(Message msg, string[] tags)
     {
@@ -96,6 +97,7 @@
         {
             FilteredMessages.Add(msg);
             await jsRuntime.InvokeAsync<string>("ScrollToBottom", "chatContainer");
+            StateHasChanged();
             return;
         }
     }
@@ -119,6 +121,7 @@
         bool isNewTagsPresent = allTags.Select(x => x.Name).Any(x => !tags.Contains(x));
 
         Message? msg = await ChatService.SendMessage(message, tags);
+        HubMessageService.SendMessageAsync(msg,tags);
         if (isNewTagsPresent)
             await ReloadAllTags();
         return msg;

@@ -11,15 +11,13 @@ namespace TaskSix_TagConvo.Server.Services
         private readonly IMessageRepo messageRepo;
         private readonly ITagRepo tagRepo;
         private readonly IMessageTagsRelationsRepo messageTagRelationsRepo;
-        IHubContext<MessageHub, IMessageHub> msgHubContext;
 
 
-        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo, IHubContext<MessageHub, IMessageHub> msgHubContext)
+        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo)
         {
             this.messageRepo=messageRepo;
             this.tagRepo=tagRepo;
             this.messageTagRelationsRepo=messageTagRelationsRepo;
-            this.msgHubContext=msgHubContext;
         }
         public async Task<List<Message>> GetMessages(int skip, int take, Guid[] tagIds)
         {
@@ -40,7 +38,6 @@ namespace TaskSix_TagConvo.Server.Services
                 await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
             }
             Message? addedMessage = await messageRepo.GetById(messageId);
-            await msgHubContext.Clients.All.SendMessage(addedMessage, tagNames);
             return addedMessage;
         }
 

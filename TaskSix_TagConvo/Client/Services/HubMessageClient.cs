@@ -26,11 +26,23 @@ namespace TaskSix_TagConvo.Client.Services
             {
                 await hubConnection.StartAsync();
             }
-            hubConnection.On<Message, string[]>("SendMessage", (message, tags) =>
+            hubConnection.On<Message, string[]>("ReceiveMessage", (message, tags) =>
             {
                 if (OnMessageRecieved!=null)
                     OnMessageRecieved.Invoke(message, tags);
             });
+        }
+        public async Task SendMessageAsync(Message msg, string[] tags)
+        {
+            await hubConnection.SendAsync("SendMessage", msg, tags);
+
+        }
+        public async ValueTask DisposeAsync()
+        {
+            if (hubConnection is not null)
+            {
+                await hubConnection.DisposeAsync();
+            }
         }
     }
     public delegate Task MessageRecieved(Message msg, string[] tags);
