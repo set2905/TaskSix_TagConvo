@@ -1,9 +1,13 @@
 ﻿@page "/"
 @using System.Text;
+@using Microsoft.AspNetCore.SignalR.Client;
 @using TaskSix_TagConvo.Client.Services.Interfaces;
 @using TaskSix_TagConvo.Shared.Model;
+
 @inject IChatService ChatService
 @inject ISnackbar Snackbar
+@inject NavigationManager Navigation
+
 
 <PageTitle>TagChat</PageTitle>
 <MudGrid Style="height:100%">
@@ -67,6 +71,8 @@
 
 
 @code {
+    HubConnection hubConnection;
+
     List<Message> FilteredMessages = new();
     List<string> myMessageTags = new();
     List<Tag> allTags = new();
@@ -79,6 +85,19 @@
     {
         await ReloadAllTags();
         await LoadFilteredMessages(GetTagFilterIds());
+        if (hubConnection == null)
+        {
+            var uri = Navigation.ToAbsoluteUri("/messageHub");
+            hubConnection = new HubConnectionBuilder().WithUrl(uri).Build();
+        }
+        if (hubConnection.State == HubConnectionState.Disconnected)
+        {
+            await hubConnection.StartAsync();
+        }
+        hubConnection.On<Message, string[]>("Message", (message, tags) =>
+        {
+            FilteredMessages.Add(message);
+        });
     }
     private async Task SendMessageFromInputValues()
     {
@@ -90,13 +109,11 @@
             msgBuilder.Append($" #{tag}");
         }
         Message? msg = await SendMessage(msgBuilder.ToString(), myMessageTags.ToArray());
-        if (msg != null)
-        {
-            FilteredMessages.Add(msg);
-            messageInputValue = string.Empty;
-        }
-        else
+        if (msg == null)
             ShowError("Couldnt send message!");
+        else
+            messageInputValue = string.Empty;
+
     }
     private async Task<Message?> SendMessage(string message, string[] tags)
     {

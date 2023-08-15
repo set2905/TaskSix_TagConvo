@@ -28,6 +28,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+builder.Services.AddSignalR();
 
 builder.Services.AddTransient<ITagRepo, TagRepo>();
 builder.Services.AddTransient<IMessageRepo, MessageRepo>();
@@ -63,5 +64,7 @@ app.UseRouting();
 app.MapRazorPages();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
+app.MapHub<MessageHub>("/messageHub");
+
 
 app.Run();

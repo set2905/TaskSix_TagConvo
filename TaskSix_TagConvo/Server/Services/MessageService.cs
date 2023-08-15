@@ -1,4 +1,5 @@
-﻿using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
+﻿using Microsoft.AspNetCore.SignalR;
+using TaskSix_TagConvo.Server.Domain.Repo.Interfaces;
 using TaskSix_TagConvo.Server.Hubs;
 using TaskSix_TagConvo.Server.Services.Interfaces;
 using TaskSix_TagConvo.Shared.Model;
@@ -10,14 +11,15 @@ namespace TaskSix_TagConvo.Server.Services
         private readonly IMessageRepo messageRepo;
         private readonly ITagRepo tagRepo;
         private readonly IMessageTagsRelationsRepo messageTagRelationsRepo;
-        private readonly IMessageHub messageHub;
+        IHubContext<MessageHub> msgHubContext;
 
-        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo, IMessageHub messageHub)
+
+        public MessageService(IMessageRepo messageRepo, ITagRepo tagRepo, IMessageTagsRelationsRepo messageTagRelationsRepo, IHubContext<MessageHub> msgHubContext)
         {
             this.messageRepo=messageRepo;
             this.tagRepo=tagRepo;
             this.messageTagRelationsRepo=messageTagRelationsRepo;
-            this.messageHub=messageHub;
+            this.msgHubContext=msgHubContext;
         }
         public async Task<List<Message>> GetMessages(int skip, int take, Guid[] tagIds)
         {
@@ -37,8 +39,8 @@ namespace TaskSix_TagConvo.Server.Services
                     tagId = await tagRepo.Save(new() { Name=tagName });
                 await messageTagRelationsRepo.Save(new() { MessageId=messageId, TagId=tagId });
             }
-            Message addedMessage = await messageRepo.GetById(messageId);
-            await messageHub.SendToAll(addedMessage, tagNames);
+            Message? addedMessage = await messageRepo.GetById(messageId);
+            await msgHubContext.Clients.All.SendAsync("Message", addedMessage, tagNames);
             return addedMessage;
         }
 
