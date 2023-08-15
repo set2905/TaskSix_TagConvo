@@ -8,18 +8,18 @@ namespace TaskSix_TagConvo.Client.Services
     public class HubMessageClient : IHubMessageService
     {
         HubConnection? hubConnection;
-        NavigationManager Navigation;
+        NavigationManager navigation;
         public event MessageRecieved? OnMessageRecieved;
         public HubMessageClient(NavigationManager navigation)
         {
-            Navigation=navigation;
+            this.navigation=navigation;
         }
 
         public async Task Initialize()
         {
             if (hubConnection == null)
             {
-                var uri = Navigation.ToAbsoluteUri("/messageHub");
+                var uri = navigation.ToAbsoluteUri("/messageHub");
                 hubConnection = new HubConnectionBuilder().WithUrl(uri).Build();
             }
             if (hubConnection.State == HubConnectionState.Disconnected)
@@ -33,5 +33,5 @@ namespace TaskSix_TagConvo.Client.Services
             });
         }
     }
-    public delegate void MessageRecieved(Message msg, string[] tags);
+    public delegate Task MessageRecieved(Message msg, string[] tags);
 }

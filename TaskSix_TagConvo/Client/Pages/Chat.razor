@@ -5,12 +5,13 @@
 @inject IChatService ChatService
 @inject ISnackbar Snackbar
 @inject IHubMessageService HubMessageService
+@inject IJSRuntime jsRuntime
 
 <PageTitle>TagChat</PageTitle>
 <MudGrid Style="height:100%">
     <MudItem xs="3">
         <MudStack>
-            <MudAutocomplete  T="string" Label="Tag Filter" ValueChanged="@AddTagFilter" SearchFunc="@SearchTags" Immediate="true"
+            <MudAutocomplete T="string" Label="Tag Filter" ValueChanged="@AddTagFilter" SearchFunc="@SearchTags" Immediate="true"
                              ResetValueOnEmptyText="false"
                              CoerceText="true" CoerceValue="false"
                              AdornmentIcon="@Icons.Material.Filled.Search" AdornmentColor="Color.Primary" />
@@ -87,11 +88,14 @@
         HubMessageService.OnMessageRecieved += HandleMessageRecieved;
 
     }
-    private void HandleMessageRecieved(Message msg, string[] tags)
+     
+
+    private async Task HandleMessageRecieved(Message msg, string[] tags)
     {
         if (showMessagesWithTags.Count==0||tags.Length==0||showMessagesWithTags.Select(x => x.Name).Any(x => tags.Contains(x)))
         {
             FilteredMessages.Add(msg);
+            await jsRuntime.InvokeAsync<string>("ScrollToBottom", "chatContainer");
             return;
         }
     }
