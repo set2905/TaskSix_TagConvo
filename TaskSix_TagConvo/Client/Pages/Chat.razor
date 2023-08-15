@@ -93,6 +93,9 @@
 
     private async Task HandleMessageRecieved(Message msg, string[] tags)
     {
+        bool isNewTagsPresent = allTags.Select(x => x.Name).Any(x => !tags.Contains(x));
+        if (isNewTagsPresent)
+            await ReloadAllTags();
         if (showMessagesWithTags.Count==0||tags.Length==0||showMessagesWithTags.Select(x => x.Name).Any(x => tags.Contains(x)))
         {
             FilteredMessages.Add(msg);
@@ -118,12 +121,10 @@
     }
     private async Task<Message?> SendMessage(string message, string[] tags)
     {
-        bool isNewTagsPresent = allTags.Select(x => x.Name).Any(x => !tags.Contains(x));
         Message? msg = await ChatService.SendMessage(message, tags);
         if (msg != null)
             await HubMessageService.SendMessageAsync(msg, tags);
-        if (isNewTagsPresent)
-            await ReloadAllTags();
+       
         return msg;
     }
     private async Task LoadFilteredMessages(Guid[] tagIds)
