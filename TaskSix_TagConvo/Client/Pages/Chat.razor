@@ -119,9 +119,9 @@
     private async Task<Message?> SendMessage(string message, string[] tags)
     {
         bool isNewTagsPresent = allTags.Select(x => x.Name).Any(x => !tags.Contains(x));
-
         Message? msg = await ChatService.SendMessage(message, tags);
-        HubMessageService.SendMessageAsync(msg,tags);
+        if (msg != null)
+            await HubMessageService.SendMessageAsync(msg, tags);
         if (isNewTagsPresent)
             await ReloadAllTags();
         return msg;

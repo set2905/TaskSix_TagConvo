@@ -14,19 +14,19 @@ var builder = WebApplication.CreateBuilder(args);
 StaticWebAssetsLoader.UseStaticWebAssets(builder.Environment, builder.Configuration);
 
 
-string? connection = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection, sqlServerOptionsAction:
-    sqlOptions =>
-    {
-        sqlOptions.EnableRetryOnFailure(maxRetryCount: 10,
-        maxRetryDelay: TimeSpan.FromSeconds(30),
-        errorNumbersToAdd: null);
-    }));
-//string? connection = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb")?? throw new InvalidOperationException("Connection string 'MYSQLCONNSTR_localdb' not found.");
+//string? connection = builder.Configuration.GetConnectionString("DefaultConnection");
+//builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connection, sqlServerOptionsAction:
+//    sqlOptions =>
+//    {
+//        sqlOptions.EnableRetryOnFailure(maxRetryCount: 10,
+//        maxRetryDelay: TimeSpan.FromSeconds(30),
+//        errorNumbersToAdd: null);
+//    }));
+string? connection = Environment.GetEnvironmentVariable("MYSQLCONNSTR_localdb")?? throw new InvalidOperationException("Connection string 'MYSQLCONNSTR_localdb' not found.");
 
-//builder.Services.AddDbContext<ApplicationDbContext>(options =>
-//    options.UseMySQL(AzureMySQL.ToMySQLStandard(connection)));
-// Add services to the container.
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseMySQL(AzureMySQL.ToMySQLStandard(connection)));
+Add services to the container.
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
