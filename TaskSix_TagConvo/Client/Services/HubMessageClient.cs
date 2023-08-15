@@ -26,7 +26,7 @@ namespace TaskSix_TagConvo.Client.Services
             {
                 await hubConnection.StartAsync();
             }
-            hubConnection.On<Message, string[]>("Message", (message, tags) =>
+            hubConnection.On<Message, string[]>("SendMessage", (message, tags) =>
             {
                 if (OnMessageRecieved!=null)
                     OnMessageRecieved.Invoke(message, tags);
